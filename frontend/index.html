@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!--
+  On visit, make a request to backend
+  Message
+  <button>Edit</button>
+  on click, change to textarea
+  and a save button
+  on save, send request to backend
+  If success, update, else error message to user
+-->
+<head>
+  <title>Leave a message!</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="index.css">
+  <script type="text/javascript" src="index.js">
+  </script>
+</head>
+<body>
+  <div id="message">
+    <button id="message-edit"
+    onClick="(() =>
+      alert(1)
+      )()"
+    >Edit</button>
+    <span id="message-text"></span>
+  </div>
+  <div id="new-message" hidden>
+    <textarea id="new-message-text"></textarea>
+    <button onClick="" id="new-message-save">
+      Save
+    </button>
+  </div>
+</body>
+<script>
+  document.getElementById("message-text").innerText = "Hello";
+  // Make a request to backend, if success, set innerText, else err msg
+</script>
