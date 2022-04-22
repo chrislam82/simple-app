@@ -13,25 +13,25 @@
   <meta charset="utf-8">
   <link rel="stylesheet" href="index.css">
   <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-  <script type="text/javascript" src="index.js"></script>
 </head>
 <body>
   <div id="message">
-    <button id="message-edit"
-    onClick="(() =>
-      alert(1)
-      )()"
-    >Edit</button>
     <span id="message-text"></span>
+    <br />
+    <button id="message-edit"
+    onClick="showEdit()"
+    >Edit</button>
   </div>
   <div id="new-message" hidden>
     <textarea id="new-message-text"></textarea>
-    <button onClick="" id="new-message-save">
+    <button onClick="saveMessage()" id="new-message-save">
       Save
     </button>
   </div>
-</body>
+</body> 
+<script type="text/javascript" src="index.js"></script>
 <script>
-  document.getElementById("message-text").innerText = "Hello";
   // Make a request to backend, if success, set innerText, else err msg
+  getMessage();
+  // document.getElementById("message-text").innerText = "Hello";
 </script>

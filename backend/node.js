@@ -15,17 +15,47 @@ Multi-threading in node.js
 - Only works on non-IO intensive tasks, since IO still handled by the main callback thread. the callback thread still handles all callbacks and worker threads simply perform computation before returnning results to callback thread
 */
 
+// like flask, add a get restful route to /hello that returns Hello World!
+// basically a route and handler 
+
+/*
+TODO:
+setup read/wrie for backend
+
+*/
+
+/*
+When have time, for Express, look at:
+View Engine: related res.rerender()
+next() (Related to routing in Express. Also, look at routing itself in express and how it works)
+Also have a look at sync, async in express
+*/
+
 const express = require('express'); // import express module
+const fs = require('fs');
+const messages = './msgs.json';
 const app = express();              // create app from express library
 const port = 3000;
 
-// like flask, add a get restful route to /hello that returns Hello World!
-// basically a route and handler 
-app.get('/hello', (req, res) => {
-  res.send('Hello World!');
+app.get('/:routename', (req, res) => {
+  console.log(`GET message with key "${req.params.routename}"`);
+
+  fs.readFile(messages, "utf8", (err, jsonString) => {
+    if (err) {
+      console.log("File read failed: ", err);
+      res.sendStatus(500); // set status to 500 with a default msg for 500. Else, res.status(500).send("some msg")
+    }
+    
+    const data = JSON.parse(jsonString);
+    if (req.params.routename in data) {
+      res.send(data[req.params.routename]);
+    } else {
+      res.send("");
+    }
+  })
 });
 
 // start running on port 3000 and logs in terminal running node what port we are running on
 app.listen(port, () => {
-  console.log(`Example app is running on port ${port}`);
+  console.log(`Node backend is running on port ${port}`);
 })
