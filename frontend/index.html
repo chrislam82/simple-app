@@ -1,13 +1,4 @@
 <!DOCTYPE html>
-<!--
-  On visit, make a request to backend (returns str for body if success, else some error message on failure)
-  Message
-  <button>Edit</button>
-  on click, change to textarea
-  and a save button
-  on save, send request to backend
-  If success, update, else error message to user
--->
 <head>
   <title>Leave a message!</title>
   <meta charset="utf-8">
@@ -15,12 +6,12 @@
   <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
 </head>
 <body>
+  Access messages left in lockers via "index.html?locker=&lt;lockername&gt;" in the URL
+  <h3>Message: </h3>
   <div id="message">
     <span id="message-text"></span>
     <br />
-    <button id="message-edit"
-    onClick="showEdit()"
-    >Edit</button>
+    <button id="message-edit" onClick="editMessage()">Edit</button>
   </div>
   <div id="new-message" hidden>
     <textarea id="new-message-text"></textarea>
@@ -31,7 +22,5 @@
 </body> 
 <script type="text/javascript" src="index.js"></script>
 <script>
-  // Make a request to backend, if success, set innerText, else err msg
   getMessage();
-  // document.getElementById("message-text").innerText = "Hello";
 </script>

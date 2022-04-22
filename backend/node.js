@@ -1,4 +1,10 @@
 /*
+TODO:
+  1. setup write to file
+  2. any tests
+*/
+
+/*
 node.js is basically runtime env that is a cmd-line interpreter for JS. It runs on the V8 Javascript Engine which compiles JS into macine code. We use it as a cmd-line interpreter (It interprets text entered by the user as a command line interface)
     node.js is like using Python3
     npm is like using pip3
@@ -19,16 +25,16 @@ Multi-threading in node.js
 // basically a route and handler 
 
 /*
-TODO:
-setup read/wrie for backend
-
-*/
-
-/*
 When have time, for Express, look at:
-View Engine: related res.rerender()
+View Engine: related res.rerender() -> I think can use like Jinja for rendering html for return
 next() (Related to routing in Express. Also, look at routing itself in express and how it works)
 Also have a look at sync, async in express
+app.use() -> acts as middleware that runs everytime regardless of the route
+app.route() -> can create route specific routing. E.g.
+  app.route()
+  .use() // Add middleware specific to route rather than to entire app
+  .get() // get route
+  .post() // post route
 */
 
 const express = require('express'); // import express module
@@ -39,6 +45,34 @@ const port = 3000;
 
 app.get('/:routename', (req, res) => {
   console.log(`GET message with key "${req.params.routename}"`);
+
+  fs.readFile(messages, "utf8", (err, jsonString) => {
+    if (err) {
+      console.log("File read failed: ", err);
+      res.sendStatus(500); // set status to 500 with a default msg for 500. Else, res.status(500).send("some msg")
+    }
+    
+    const data = JSON.parse(jsonString);
+    if (req.params.routename in data) {
+      res.send(data[req.params.routename]);
+    } else {
+      res.send("");
+    }
+  })
+});
+
+/*
+TODO:
+  to write to file, just replace code from read
+  JSON.parse()
+  modify
+  then JSON.stringify
+
+  Since API, anyone can access, so potential of race or corruptiont
+  to address, have a look at fs-ext (fs with extended functionality)
+*/
+app.post('/:routename', (req, res) => {
+  console.log(`POST message with key "${req.params.routename}"`);
 
   fs.readFile(messages, "utf8", (err, jsonString) => {
     if (err) {
