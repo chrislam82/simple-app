@@ -1,18 +1,29 @@
-// GET to backend
+const backendAddr = 'http://127.0.0.1:5000';
+
+/*
+  request message from backend given locker in querystring
+  - change text in span and textarea on success
+*/
 const getMessage = () => {
   const locker = new URLSearchParams(window.location.search);
-  console.log(locker.get("locker"));
   if (!locker.get("locker")) {
-    document.getElementById("message-text").innerText = ""; // DUMMY
-    return "";
+    document.getElementById("message-text").innerText = "";
+    return;
   }
-  document.getElementById("message-text").innerText = locker.get("locker"); // DUMMY
-  document.getElementById("new-message-text").value = locker.get("locker");
-  /*
-    request message from backend given locker
-    If success, change text in span and textarea for editing
-    else some error, so meaningful message
-  */
+
+  fetch(`${backendAddr}/${locker.get("locker")}`
+  ).then(res => {
+    if (!res.ok) {
+      throw(res.statusText);
+    }
+    return res.json();
+  }).then(data => {
+    document.getElementById("message-text").innerText = data.message;
+    document.getElementById("new-message-text").value = data.message;
+  }).catch(err => {
+    console.log(`Error: ${err}`);
+    alert("Unable to access lockers. Try again later");
+  });
 };
 
 // Toggle hidden for storing message in locker
@@ -24,6 +35,9 @@ const editMessage = () => {
 // POST to backend
 // Also need to handle meaningful indicator of success/failure. Just use an alert
 const saveMessage = () => {
+  console.log(document.getElementById("new-message-text"));
+  return; 
+
   alert("Message changed successfully!");
   location.reload(); // on success. Can also edit id values but id rather not
 }

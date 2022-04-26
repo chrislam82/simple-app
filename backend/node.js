@@ -39,9 +39,13 @@ app.route() -> can create route specific routing. E.g.
 
 const express = require('express'); // import express module
 const fs = require('fs');
+const lockFile = require('lockfile');
 const messages = './msgs.json';
+const cors = require('cors');
 const app = express();              // create app from express library
-const port = 3000;
+const port = 5000;
+
+app.use(cors());                    // middleware to enable CORS on all routes of app
 
 app.get('/:routename', (req, res) => {
   console.log(`GET message with key "${req.params.routename}"`);
@@ -50,13 +54,15 @@ app.get('/:routename', (req, res) => {
     if (err) {
       console.log("File read failed: ", err);
       res.sendStatus(500); // set status to 500 with a default msg for 500. Else, res.status(500).send("some msg")
-    }
-    
-    const data = JSON.parse(jsonString);
-    if (req.params.routename in data) {
-      res.send(data[req.params.routename]);
     } else {
-      res.send("");
+      const data = JSON.parse(jsonString);
+      let messageText = "";
+      if (req.params.routename in data) {
+        messageText = data[req.params.routename];
+      }
+      res.send({
+        "message": messageText,
+      });
     }
   })
 });
