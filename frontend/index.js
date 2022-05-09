@@ -1,9 +1,6 @@
 const backendAddr = 'http://127.0.0.1:5000';
 
-/*
-  request message from backend given locker in querystring
-  - change text in span and textarea on success
-*/
+// Get message for current queryString (key)
 const getMessage = () => {
   const locker = new URLSearchParams(window.location.search);
   if (!locker.get("locker")) {
@@ -32,12 +29,30 @@ const editMessage = () => {
   document.getElementById("message").hidden = true;
 }
 
-// POST to backend
-// Also need to handle meaningful indicator of success/failure. Just use an alert
+// Save new message tot queryString (key)
 const saveMessage = () => {
-  console.log(document.getElementById("new-message-text"));
-  return; 
+  const locker = new URLSearchParams(window.location.search);
 
-  alert("Message changed successfully!");
-  location.reload(); // on success. Can also edit id values but id rather not
+  const newMessage = document.getElementById("new-message-text").value;
+
+  fetch(`${backendAddr}/${locker.get("locker")}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: newMessage,
+    }),
+  }).then(res => {
+    if (!res.ok) {
+      throw(res.statusText);
+    }
+    return res.json();
+  }).then(data => {
+    alert("Message changed successfully!");
+    location.reload();
+  }).catch(err => {
+    console.log(`Error: ${err}`);
+    alert("Unsuccessful in updating message. Try again later");
+  });
 }

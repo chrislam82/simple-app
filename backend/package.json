@@ -1,0 +1,22 @@
+{
+  "name": "SimpleExpressBackend",
+  "version": "1.0.0",
+  "description": "Simple backend server for read/write to a .json file",
+  "main": "server.js",
+  "scripts": {
+    "test": "none for now"
+  },
+  "repository": {
+    "type": "git",
+    "url": "totdo"
+  },
+  "keywords": [
+    "none"
+  ],
+  "author": "Chris Lam",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "proper-lockfile": "^4.1.2"
+  }
+}
