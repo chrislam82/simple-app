@@ -1,14 +1,16 @@
 {
-  "name": "SimpleExpressBackend",
+  "name": "simple-express-backend",
   "version": "1.0.0",
-  "description": "Simple backend server for read/write to a .json file",
+  "description": "Simple express backend server for read/write to a .json file",
   "main": "server.js",
+  "type": "module",
   "scripts": {
-    "test": "none for now"
+    "test": "none for now",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
-    "url": "totdo"
+    "url": "todo"
   },
   "keywords": [
     "none"
@@ -17,6 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
+    "nodemon": "^2.0.16",
     "proper-lockfile": "^4.1.2"
   }
 }
