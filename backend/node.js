@@ -36,7 +36,7 @@ app.post('/:routename', (req, res) => {
   console.log(`POST message with key "${req.params.routename}"`);
 
   if (req.body.message) {
-    updateData(req.params.routename, req.body.message)
+    updateLocker(req.params.routename, req.body.message)
     .then(() => {
       console.log("   Updated DATASTORE successfully");
       res.send({
@@ -52,24 +52,57 @@ app.post('/:routename', (req, res) => {
   }
 });
 
-const updateData = (key, msg) => new Promise((resolve, reject) => {
-  console.log("   Acquiring lock on DATASTORE");
+const updateLocker = (key, msg) => new Promise((resolve, reject) => {
+  console.log(`   Updating locker: ${key}`);
+
   lockFile.lock(DATASTORE, retryOptions)
-  .then(release => {    
-    try {
-      let newMsgData = msgData;
-      newMsgData[key] = msg;
-      fs.writeFileSync(DATASTORE, JSON.stringify(newMsgData));
+  .then(release => {
+    let newMsgData = msgData;
+    newMsgData[key] = msg;
+
+    updateData(newMsgData)
+    .then(() => {
       msgData = newMsgData;
-      resolve("Success");
-    } catch {
+      resolve();
+    }).catch(err => {
       reject(new Error(`Update to DATASTORE failed`));
-    }
+    })
     release();
   }).catch(err => {
     reject(new Error(`Lock to update DATASTORE failed: ${err}`));
   })
 });
+
+const updateAll = (data) => new Promise ((resolve, reject) => {
+  console.log(`   Updating all lockers`);
+
+  lockFile.lock(DATASTORE, retryOptions)
+  .then(release => {
+    updateData(data)
+    .then(() => {
+      msgData = data;
+      resolve();
+    }).catch(err => {
+      reject(new Error(`Update to DATASTORE failed`));
+    })
+    release();
+  }).catch(err => {
+    reject(new Error(`Lock to update DATASTORE failed: ${err}`));
+  })
+});
+
+const updateData = (data) => new Promise((resolve, reject) => {
+  try {
+    fs.writeFile(DATASTORE, JSON.stringify(data), (err) => {
+      if (err) {
+        throw new Error(err);
+      }
+    })
+    resolve();
+  } catch(err) {
+    reject(new Error(`Update to DATASTORE failed: ${err}`));
+  }
+})
 
 const readData = () => new Promise((resolve, reject) => {
   console.log("   Reading DATASTORE...");
@@ -77,10 +110,14 @@ const readData = () => new Promise((resolve, reject) => {
   lockFile.lock(DATASTORE, retryOptions)
   .then(release => {
     try {
-      const data = JSON.parse(fs.readFileSync(DATASTORE, 'utf-8'));
-      resolve(data);
-    } catch {
-      reject(new Error(`Unable to read from DATASTORE`));
+      fs.readFile(DATASTORE, 'utf-8', (err, data) => {
+        if (err) {
+          throw new Error(err);
+        }
+        resolve(JSON.parse(data));
+      })
+    } catch(err) {
+      reject(new Error(`Unable to read from DATASTORE: ${err}`));
     }
     release();
   }).catch(err => {
