@@ -56,3 +56,5 @@ const saveMessage = () => {
     alert("Unsuccessful in updating message. Try again later");
   });
 }
+
+getMessage();
