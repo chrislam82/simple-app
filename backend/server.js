@@ -7,6 +7,7 @@ import {
   updateLocker,
   readLocker,
   loadData,
+  initData,
 } from './database.js';
 
 const app = express();              // create app from express library
@@ -52,14 +53,9 @@ app.post('/:routename', (req, res) => {
  *                        Start Server                                  *
  ***********************************************************************/
 
-loadData()
-.then(() => {
-  console.log("Loaded data. App ready to start");
-
-  // start running on port 5000 and logs in terminal running node what port we are running on
-  app.listen(port, () => {
-    console.log(`Express backend is running on port ${port}`);
-  });
-}).catch(err => {
-  console.log(`Error loading data for starting App. ${err}`);
-})
+initData();
+console.log("Loaded data. App ready to start");
+// start running on port 5000 and logs in terminal running node what port we are running on
+app.listen(port, () => {
+  console.log(`Express backend is running on port ${port}`);
+});

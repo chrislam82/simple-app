@@ -1,7 +1,7 @@
 import fs from 'fs';
 import lockFile from 'proper-lockfile';
 
-const DATASTORE = './msgs.json';
+const DATASTORE = '/etc/simple-express-app/msgs.json';
 
 let msgData = {};
 
@@ -91,7 +91,23 @@ export const loadData = () => new Promise((resolve, reject) => {
       reject(new Error(`Unable to read from DATASTORE: ${err}`));
     }
     release();
+   resolve();
   }).catch(err => {
     reject(new Error(`Lock to read DATASTORE failed: ${err}`));
   })
 })
+
+/*
+ * Sync load of DATASTORE
+ * - If it doesn't exist, create DATASTORE and load empty JSON data
+ */
+export const initData = () => {
+  console.log("   Initialising DATASTORE");
+
+  if (fs.existsSync(DATASTORE)) {    
+    msgData = JSON.parse(fs.readFileSync(DATASTORE, 'utf-8'));
+  } else {
+    console.log("   DATASTORE not found. Initialising new DATASTORE");
+    fs.writeFileSync(DATASTORE, JSON.stringify(msgData));
+  }
+}
