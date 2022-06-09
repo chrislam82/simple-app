@@ -1,4 +1,4 @@
-const backendAddr = 'http://127.0.0.1:3000';
+const backendAddr = `http://127.0.0.1:${backendPort}`;
 
 // Get message for current queryString (key)
 const getMessage = () => {  

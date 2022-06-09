@@ -10,15 +10,21 @@ services:
     networks:
       - isolated-network
     ports:
-      - "3000:3000"
+      - "${BACKEND_HOST_PORT}:${BACKEND_CONTAINER_PORT}"
+    environment:
+      - BACKEND_PORT=${BACKEND_CONTAINER_PORT}
   
   frontend:
     build:
       context: ./frontend/
+      args:
+        BACKEND_PORT: ${BACKEND_HOST_PORT}
     networks:
       - isolated-network
     ports:
-      - "3001:3001"
+      - "${FRONTEND_HOST_PORT}:${FRONTEND_CONTAINER_PORT}"
+    environment:
+      - FRONTEND_PORT=${FRONTEND_CONTAINER_PORT}
 
 # Named volume mounted using an externally created named volume
 volumes:

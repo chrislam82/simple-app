@@ -11,7 +11,7 @@ import {
 } from './database.js';
 
 const app = express();              // create app from express library
-const port = 3000;
+const port = process.env.BACKEND_PORT || 3000;
 
 // Middleware
 app.use(cors());                    // enable CORS on all routes of express app
