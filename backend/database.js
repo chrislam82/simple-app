@@ -1,7 +1,7 @@
 import fs from 'fs';
 import lockFile from 'proper-lockfile';
 
-const DATASTORE = '/etc/simple-express-app/msgs.json';
+const DATASTORE = './database/msgs.json';
 
 let msgData = {};
 

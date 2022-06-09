@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+  backend:
+    build:
+      context: ./backend/
+    volumes:
+      - type: volume
+        source: simple-app-volume
+        target: /simple-app/backend/database/
+    networks:
+      - isolated-network
+    ports:
+      - "${BACKEND_HOST_PORT}:${BACKEND_CONTAINER_PORT}"
+    environment:
+      - BACKEND_PORT=${BACKEND_CONTAINER_PORT}
+  
+  frontend:
+    build:
+      context: ./frontend/
+      args:
+        BACKEND_PORT: ${BACKEND_HOST_PORT}
+    networks:
+      - isolated-network
+    ports:
+      - "${FRONTEND_HOST_PORT}:${FRONTEND_CONTAINER_PORT}"
+    environment:
+      - FRONTEND_PORT=${FRONTEND_CONTAINER_PORT}
+
+# Named volume mounted using an externally created named volume
+volumes:
+  simple-app-volume:
+    external: true
+
+# Unlike docker run normally, docker-compose creates a default network that isn't the network with NAME="bridge"
+# Specify own network name rather than use default "simple-app_default" used by docker-compose given name of cwd
+# Can use external like volumes above to specify an external network
+# its bridge by default. Just being verbose
+# Issue: Not actually using in index.js at the moment since fetch() being called from Browser on host, not from the container hosting the frontend files. But the config still stands
+networks:
+  isolated-network:
+    driver: bridge
