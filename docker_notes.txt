@@ -1,0 +1,289 @@
+##########################################################
+#                           Docker                       #
+##########################################################
+# NOTE: Very basic notes and reference for using Docker. Much more complexity. Some notes may be wrong since based on my understanding at the time
+
+Currently built on top of runc instead of LXC(Linux Containers)
+Package application, configuration, dependencies (e.g. in /bin/lib) into an image without requiring its own kernel each time
+Image is then run on the host OS as a process that runs seperately from other processes within the host OS, interfacing with host OS via the Docker Engine
+Can share other resources such as /bin and libraries if possible
+consistency in deploying without having to make sure that all images configured the same; Abstracted from host OS so that it can run the same independent of the host OS
+If image fails, can just deploy another since already packaged so more fault tolerance
+Can spin up and spindown containers in the cloud depending on the level of traffic, hence better resource utilisation
+Use docker containers to store data like a USB or can setup a dedicated file/folder within host OS as a more direct bridge between image and host OS
+setup TCP/IP port mappings between image and host for access to web and to expose ports on host OS
+
+Goals
+1. Easy to build into image
+2. Easy to ship to someone else (e.g. overcloud - so can just download image over cloud and run it immediately)
+3. Easy to run and runs consistently
+Dont have to take down server and try fix
+- Get another image, make changes, then deploy as update in place of previous image(s)
+
+Docker image becomes a Docker container once it is spun up
+
+# Docker Image
+Docker containers use an isolated filesystem away from host. this custom filesystem is provdided by the docker image. Since it is a separate filesystem, it needs everything necessary to run a filesystem to support the app (dependencies, config, scripts, binaries, etc). Image also contains other configurations (e.g. env variables), default commands to run, and other metadata
+
+# Docker Container
+Simply a process on host machine isolated from all other processes on host machine
+
+# Multiple services in 1 docker image
+ (e.g. Python in a container which is also running node (so Python is not installed))
+	https://stackoverflow.com/questions/71197350/use-python-and-node-js-in-the-same-dockerfile-and-create-one-image-that-i-cloud
+	https://docs.docker.com/config/containers/multi-service_container/
+Its possible. Have 1 main docker image (e.g. node). Then have other files like a script or venv so that other dependencies are also installed (e.g. python and python dependencies) so that multiple services can be run
+However, its best practise to separate the services if possible
+
+##############################
+#     Containers vs VMs      #
+##############################
+	https://blogs.umass.edu/Techbytes/2018/10/09/what-is-docker-and-how-does-it-work/
+	https://stackoverflow.com/questions/16047306/how-is-docker-different-from-a-virtual-machine
+	https://stackoverflow.com/questions/29096967/what-are-the-differences-between-a-vm-image-and-a-docker-image?noredirect=1&lq=1
+	https://www.docker.com/resources/what-container/
+	https://www.vmware.com/topics/glossary/content/hypervisor.html#:~:text=A%20hypervisor%2C%20also%20known%20as,such%20as%20memory%20and%20processing.
+
+Containers abstract the Host OS Kernel whereas VMs abstract the hardware layer. That is, containers package code and dependencies for running the application, running as its own set of isolated 	es on top of the host OS, so don't require its own guest OS kernel. Instead, the container interfaces with the host OS via the Docker Engine. VMs on the other hand also contain its own guest OS kernel, so contain a copy of an entire guest OS to interface with the hardware layer. Hence, it is more expensive and takes longer to spin up. Therefore, if trying to run multiple VMs, we would be running multiple resources that are redundant as they could have been shared with each other instead.
+
+- Typically use CLI instead of GUI to interact with Docker image
+- Because Docker images are more lightweight, they spin up and shut down much faster than VMs
+- Because Docker images share resources, there is obviously less isolation with Docker images in comparison to VMs. Which is an issue only if complete isolation is required.
+
+##############################
+#              OSes          #
+##############################
+
+Containers initially built for LINUX systems. The general idea is that the core LINUX kernel is generally the same between all LINUX based OSes, so containers are built on this kernel. The differences between each OS are whats being imported in the container base image OSes, to provide functionality, libraries, ... specific to that OS. They do not need their own Kernel NORMALLY. This is in comparison to VMs which have a different kernel for each OS (hence why containers are more lightweight and build and deploy faster).
+
+However, this also means that there are compability issues between LINUX and non-LINUX OSes
+
+# Windows Containers for LINUX host OSes
+I believe you cannot run a Windows OS on a Linux Host OS since it doesnt have a windows kernel. To get around this, you would need to run a Windows VM on a LINUX OS, then run a Windows container inside that Windows VM to achieve containerisaiton
+
+# Windows Containers
+	https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/linux-containers
+This is also true in reverse. To run a Linux OS image container on a Windows host OS, it would need access to a LINUX kernel. The basic idea behind this is that containerisation to work, the process spins up a minimal LINUX kernel that can access the hardware components of the device, then use this LINUX kernel for running Docker like normal. See Hyper-V for Windows
+
+https://blog.vizuri.com/docker-for-windows-vs.-docker-on-windows-server
+- Basically, Docker FOR Windows allow use of Docker like normal, but requires a LINUX kernel to be virtualised
+- Docker ON Windows allows strictly Windows containers on a Windows Host OS without LINUX kernel virtualisation
+
+NOTE: A container is "native" if it can run on the host OS without any underlying VM
+-- For windows, someone stated that running on Hyper-V is still native since it ships with modern Windows OSes as a VM solution so doesnt require a third-party software to run
+-- Depends on what Docker Engine we use. For example, Docker FOR Windows uses Hyper-V as an underlying Linux VM, whereas Docker ON Windows does not require the extra layer of virtualization
+
+##############################
+#     Container security     #
+##############################
+# Brief
+Since containers are not completely indepedent and can possibly share some resources like libraries with other containers as well as accesing the same host OS as other containers and the host OS itself, there is potential for horizontal or vertical access. Therefore, containers have configuration to prevent certain components of a container from being accessed or restricting communication with some resources. E.g. using Linux namespaces to isolate resources within its own Container
+
+##############################
+#         Docker Engine      #
+##############################
+	https://www.youtube.com/watch?v=-2RqJyr45Fg
+Basically a term for the package of everything required for Docker to run. Acts as the middleware that translates between the host OS and the Containers
+Basically like the hypervisor for VMs (but not the same layers...)
+- The Docker Daemon (Docker background processes) that manage all the containers on the host
+- Docker REST Api for interacing with Docker daemon
+- Docker CLI for clients to interface with Docker Daemon
+- ... and other stuff like networking, Storage, addons, security, etc
+
+##############################
+#         Dockerfile         #
+##############################
+	https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
+	https://docs.docker.com/engine/reference/builder/
+text based instructions used to tell Docker how to create a container image (Just a list of commands executed in order)
+- FROM node:12.16.3 - use a base image that contains everything that I already need
+- WORKDIR /code
+	set working directory at path in container once running
+- ENV port 80 - set environment variable that can be accessed by apps running inside the image
+- RUN npm install - install dependencies from package.json
+	execute at build time
+- COPY . /code copy everything in cwd into "code" directory
+	Also have a .dockerignore file just like .gitignore for files not to COPY
+- CMD [ "node", "src/server.js ]
+	A default command for Docker Engine to run when it starts the container
+	does not run on build. Runs on docker run when starting container
+
+# RUN vs CMD vs ENTRYPOINT
+	https://codewithyury.com/docker-run-vs-cmd-vs-entrypoint/
+	https://www.tutorialspoint.com/run-vs-cmd-vs-entrypoint-in-docker
+RUN - Run during build, adding to each layer of the build process
+CMD - Default command to run when container is run if a comamnd is not provided
+ENTRYPOINT - Looks similar to CMD. For when running container as an executable. Won't be ignored even if CLI args provided on runtime
+
+NOTE: I believe image built in layers, with each instruction adding to the next. This is important because they can be cached. So if we have instructions that likely wont change and can be run earlier with no issue, place them earlier. This allows caching of the image at this stage which means if Dockerfile is changed later, the first few layers dont need to be rebuilt
+
+##############################
+#         Docker CLI         #
+##############################
+
+# docker build
+	-> Build a Docker image from a Dockerfile
+docker build -t getting-started .
+-t getting-started 	-> tag image with name getting-started so it has a human readable name
+.					-> directory to look for Dockerfile
+
+docker images
+	-> list of images on local machine
+
+docker ps
+	-> list of containers running on local machine
+-a 			-> show stopped containers too
+
+# docker run
+	-> run container from image - basically runs like its own env within a process
+docker run -d -p 80:80 docker/getting-started
+-d			-> run in detached mode (in the background)
+-p 8080:80	-> map port 8080 of host to port 80 of container
+docker/...	-> docker image to run
+
+Multi-port
+docker run -d -p 80-81:80-81 docker/getting-started
+docker run -d -p 80:80 -p 81:81 docker/getting-started
+
+# docker stop <container id>
+	-> stop container with <container id>
+
+# docker restart <container-NAME>
+	-> restart a stopped container
+
+# docker rm <container id>
+	-> remove container with <container id>
+	-f 			-> force rm so can rm container without calling stop
+
+# docker tag <old-name> <new-name>
+	-> rename a docker image
+
+# docker login -u YOUR-USER-NAME
+# docker push <image-name>
+	-> just like git. Login to docker in command line, then can push to Docker Hub repo
+
+docker logs <container_id>
+	-> check logs from a container
+	-- follow to follow logs
+
+docker exec <container_id> <commands as args>
+	e.g. docker exec 4dd2cd2b9fa3 pwd
+
+##############################
+#       data persistence     #
+##############################
+Methods of sharing and allowing data to exist beyond filesystem of a container
+	2 ways (prob more)
+	Also see https://docs.docker.com/storage/
+1. volumes (https://docs.docker.com/storage/volumes/)
+	preferred method
+	mount a directory onto docker fs
+	Good thing about docker volumes is that they are all stored in the same place (see docker volume inspect <volume_name>)
+	with docker volumes, we dont have to worry where the data itself is stored (I believe is stored relative docker. e.g. "Mountpoint": "/var/lib/docker/volumes/todo-db/_data")
+2. bind mount
+	link to a directory in host machine from Docker
+	With bind mount, we instead control where the data/directory that is mounted on the docker container fs is stored (the mountpoint)
+	Often used for purposes beyond data persistence
+		E.g. we can user bindmount to the source code itself so that with nodemon, the app running in docker container rerenders with each change in src code
+	(Look at in own time if desired)
+
+# Named volumes
+	-> Explicitly creating a docker volume with a tagged name
+	(This is just one method, there are others: naming a path in actual host os, and not providing a named volume so docker just assigns a random hash instead)
+docker volume create simple-express-volume
+	Create a Docker volume
+
+docker run -d -p 5000:5000 -v simple-express-volume:/etc/simple-express-app simple1
+	path must be absolute
+	We specify a volume 'simple-express-volume' and mount it onto the path /etc/simple-express-app
+		When container writes to this path, it gets replicated to the volume (whether on the linux VM for docker desktop or the actual host os for docker engine)
+
+docker run -d -p 5000:5000 -v simple-express-volume:/etc/simple-express-app:ro simple1
+	same as above but adding :ro so that volume is read only
+
+docker info
+currently using Docker Desktop which runs everything on a lightweight linux VM rather than the host OS itself. So I would need to remote into VM to see actual docker volumes
+	https://www.freecodecamp.org/news/where-are-docker-images-stored-docker-container-paths-explained/
+		Has instructions on how to create shell in virtual env
+		A cmd copied that mounts vm on ubuntu: docker run -it --rm -v demo-earthly:/opt/demo-earthly ubuntu ls /opt/demo-earthly
+
+docker volume ls
+	list all docker volumes
+
+##############################
+#    container networking    #
+##############################
+# Good to know for devops for managing Docker systems
+# NOTE: Theres so much more networking complexities beyond this
+
+	https://docs.docker.com/get-started/07_multi_container/
+	https://docs.docker.com/network/bridge/
+	https://en.wikipedia.org/wiki/Network_bridge
+Too complicated and not sure if I need atm. Revisit if necessary
+
+docker network ls
+	- networks available to Docker ecosystem
+
+General idea (I think... Related to network bridges I think ...)
+	Normally if not specified, docker containers running on the default network bridge
+	If we want, we can create user defined network bridges. This allows us to define networks that provide isolated networks within the same Docker daemon (the process running Docker)
+	This provides isolation from other docker networks, else containers can communicate with each other freely
+	Basically, within a specific network bridge, containers can communicate with each other freely just like running apps on localhost but arent specifically exposed to the outside world (in this case, the outside world and other docker networks)
+	For example, in tutorial, running a mysql server in a specific named docker network, connect app which uses this mysql server. App itself is connected to host network like normal, but the mysql server is not accessable to outside world and only accessable if something is connected to the named docker network
+
+using a named network:
+	lets say I have a named network called "internal-network" with default driver: bridge
+	With named containers within same network, can use http://<container_name>:<port>/api... instead of the actual IP address to send requests
+	Why wasn't it working for the simple-app I built?
+		fetch() call is being called from index.js that is loaded in browser. fetch call is actually happening inside the browser, if I look at the REQUEST:
+			Referer http://localhost:3001/
+			User-Agent: Mozilla/5.0 ...
+		frontend is simply serving html, css, js which I am loading in browser. Request is being sent in browser, so not actually using the container in network bridge to make a request. Hence why it doesnt work and I'm getting CORS error
+
+##############################
+#        Docker-compose      #
+##############################
+Dockerfile vs docker-compose.yaml
+A Dockerfile is a simple text file that contains the commands a user could call to assemble an image.
+docker-compose allows us to define and run multi-container Docker apps with one command on the same machine. If we want it across multiple machines, look at docker swarm or kubernetes
+
+# Related reads
+	https://docs.docker.com/compose/
+	https://gabrieltanner.org/blog/docker-compose
+	https://runnable.com/docker/advanced-docker-compose-configuration
+
+# Reference for docker-compose using version:"3.X"
+	https://docs.docker.com/compose/compose-file/compose-file-v3/
+
+# Define a multi-container application stackt using YAML file
+'docker version' to check Docker Engine version then use most recent compatable version of compose
+
+# Docker-compose networking
+	https://medium.com/@caysever/docker-compose-network-b86e424fad82
+	https://docs.docker.com/compose/networking/
+
+# Setting ENV vs ARG in docker-compose.yaml
+	https://docs.docker.com/compose/environment-variables/
+	https://vsupalov.com/docker-arg-vs-env/
+ARG used only in build
+ENV sets ENV variable available in container once running
+Both available during build but ENV can't be modified during build
+
+depends_on: 	Specify dependencies so that the dependencies are running before service runs
+
+Can use combined bind and named mount. Bind for something like nodemon. named mount for mounting docker volume into persistant volume
+
+# Run detached
+docker-compose up -d
+# Stop then teardown
+docker-compose stop && docker-compose rm -f
+
+##############################
+#     Other (Not Docker)     #
+##############################
+# Hypervisor (VMs)
+Similar to Docker Engine, Hypervisor refers to everything that is required to create and run VMs by translating the requests between the hardware and the virtual machines; Basically the middleware between the hardware layer and the guest OSes of the VMs
+
+# Kubernetes
+A system for automating operation containerised applications at scale (e.g. installing, scaling, management of containers)
+- Also see Docker Swarm which I think serves the same purpose
