@@ -30,7 +30,7 @@ cp .env.example .env
 and change ports to desired ports in .env
 
 ### Build and Run
-Run command from directory /simple-app where docker-compose.yaml is located
+Run command from directory /simple-app where docker-compose.yml is located
 ```
 docker compose up
 ```
