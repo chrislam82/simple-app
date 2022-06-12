@@ -6,7 +6,6 @@ import cors from 'cors';
 import {
   updateLocker,
   readLocker,
-  loadData,
   initData,
 } from './database.js';
 
@@ -40,11 +39,11 @@ app.post('/:routename', (req, res) => {
         "status": "success",
       })
     }).catch(err => {
-      console.log(`   Unsuccessful in updating DATASTORE: ${err}`);
+      console.error(`   Unsuccessful in updating DATASTORE: ${err}`);
       res.sendStatus(500);
     })
   } else {
-    console.log("   Client did not include new message in request body");
+    console.error("   Client did not include new message in request body");
     res.sendStatus(400);
   }
 });
@@ -55,7 +54,7 @@ app.post('/:routename', (req, res) => {
 
 initData();
 console.log("Loaded data. App ready to start");
-// start running on port 3000 and logs in terminal running node what port we are running on
+// start running on port specified and logs in terminal running node what port we are running on
 app.listen(port, () => {
   console.log(`Express backend is running on port ${port}`);
 });
