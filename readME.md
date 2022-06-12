@@ -58,4 +58,5 @@ docker-compose stop && docker-compose rm -f
 - Testing (Including Front-end testing)
 - Add linter and setup linting rules
 - Swagger UI
+- Logging
 - ... To add more as it comes to mind
