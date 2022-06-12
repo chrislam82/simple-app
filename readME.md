@@ -3,7 +3,7 @@ Simple App built using node/express for Backend and python http.server for acces
 
 **Purpose:**
 - To learn basics of node and express
-- Practise basic software engineering practises
+- Practise basic software engineering practices
 - Exploring other things like using containers and cloud
 
 ## Setup
@@ -32,7 +32,24 @@ and change ports to desired ports in .env
 ### Build and Run
 Run command from directory /simple-app where docker-compose.yml is located
 ```
-docker compose up
+docker-compose up
+```
+App is now accessable via BACKEND_HOST_PORT for backend API and FRONTEND_HOST_PORT for frontend via localhost
+
+### Additional
+To stop the process, run
+```
+docker-compose stop
+```
+
+To remove the containers, run
+```
+docker-compose rm -f
+```
+
+Combined
+```
+docker-compose stop && docker-compose rm -f
 ```
 
 ## Other things to explore
@@ -40,4 +57,5 @@ docker compose up
 - CI/CD
 - Testing (Including Front-end testing)
 - Add linter and setup linting rules
+- Swagger UI
 - ... To add more as it comes to mind
